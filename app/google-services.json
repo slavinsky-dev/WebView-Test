@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1028170262681",
+    "firebase_url": "https://traffic-devils-test.firebaseio.com",
+    "project_id": "traffic-devils-test",
+    "storage_bucket": "traffic-devils-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028170262681:android:aef736c1cf36bdd9227008",
+        "android_client_info": {
+          "package_name": "com.slavinskydev.trafficdevilstest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1028170262681-4edmsqhu3lpm1ootejletthvqpohknb2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUA9a_k8VJIYCln5cjmftm5Ov4bYlelcc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1028170262681-4edmsqhu3lpm1ootejletthvqpohknb2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
