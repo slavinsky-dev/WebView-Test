@@ -1,10 +1,11 @@
-package com.slavinskydev.trafficdevilstest.game;
+package com.slavinskydev.trafficdevilstest.screens.game;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,9 +19,8 @@ import android.view.animation.Animation;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.slavinskydev.trafficdevilstest.MainActivity;
+import com.slavinskydev.trafficdevilstest.screens.loader.LoaderActivity;
 import com.slavinskydev.trafficdevilstest.R;
 
 import java.util.ArrayList;
@@ -227,7 +227,9 @@ public class GameActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                MainActivity.firstRunPlease();
+                                LoaderActivity.firstRunPlease();
+                                Intent intent = new Intent(GameActivity.this, LoaderActivity.class);
+                                startActivity(intent);
                                 finish();
                                 break;
                             case DialogInterface.BUTTON_NEGATIVE:

@@ -1,4 +1,4 @@
-package com.slavinskydev.trafficdevilstest;
+package com.slavinskydev.trafficdevilstest.screens.loader;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -15,10 +14,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.slavinskydev.trafficdevilstest.game.GameActivity;
-import com.slavinskydev.trafficdevilstest.webview.WebViewActivity;
+import com.slavinskydev.trafficdevilstest.R;
+import com.slavinskydev.trafficdevilstest.screens.game.GameActivity;
+import com.slavinskydev.trafficdevilstest.screens.webview.WebViewActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class LoaderActivity extends AppCompatActivity {
 
     private static SharedPreferences sharedPreferencesFirstRun = null;
     private static boolean firstRun;
@@ -53,16 +53,16 @@ public class MainActivity extends AppCompatActivity {
                                 if (documentSnapshot == null) return;
                                 condition = documentSnapshot.getBoolean("response");
                                 if (condition) {
-                                    Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                                    startActivity(intent);
+                                    Intent intent = new Intent(LoaderActivity.this, WebViewActivity.class);
+                                    startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                     nextRun = sharedPreferencesNextRun.edit().putBoolean("nextrun", true).commit();
                                 } else {
-                                    Intent intent = new Intent(MainActivity.this, GameActivity.class);
-                                    startActivity(intent);
+                                    Intent intent = new Intent(LoaderActivity.this, GameActivity.class);
+                                    startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                     nextRun = sharedPreferencesNextRun.edit().putBoolean("nextrun", false).commit();
                                 }
                             } else {
-                                Toast.makeText(MainActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoaderActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -70,11 +70,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             nextRun = sharedPreferencesNextRun.getBoolean("nextrun", false);
             if (nextRun) {
-                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                startActivity(intent);
+                Intent intent = new Intent(LoaderActivity.this, WebViewActivity.class);
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
             } else {
-                Intent intent = new Intent(MainActivity.this, GameActivity.class);
-                startActivity(intent);
+                Intent intent = new Intent(LoaderActivity.this, GameActivity.class);
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
             }
         }
     }

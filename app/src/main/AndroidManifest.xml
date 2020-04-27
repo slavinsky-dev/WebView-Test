@@ -17,16 +17,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".game.GameActivity"
+        <activity android:name=".screens.game.GameActivity"
             tools:ignore="LockedOrientationActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask" />
         <activity
-            android:name=".webview.WebViewActivity"
-            android:configChanges="orientation|screenSize" />
-        <activity android:name=".MainActivity">
+            android:name=".screens.webview.WebViewActivity"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTask"
+            />
+        <activity android:name=".screens.loader.LoaderActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

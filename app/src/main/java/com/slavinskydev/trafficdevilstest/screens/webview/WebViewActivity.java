@@ -1,4 +1,4 @@
-package com.slavinskydev.trafficdevilstest.webview;
+package com.slavinskydev.trafficdevilstest.screens.webview;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,11 +18,10 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
-import com.slavinskydev.trafficdevilstest.MainActivity;
+import com.slavinskydev.trafficdevilstest.screens.game.GameActivity;
+import com.slavinskydev.trafficdevilstest.screens.loader.LoaderActivity;
 import com.slavinskydev.trafficdevilstest.R;
-import com.slavinskydev.trafficdevilstest.game.GameActivity;
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -112,7 +112,9 @@ public class WebViewActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                MainActivity.firstRunPlease();
+                                LoaderActivity.firstRunPlease();
+                                Intent intent = new Intent(WebViewActivity.this, LoaderActivity.class);
+                                startActivity(intent);
                                 finish();
                                 break;
                             case DialogInterface.BUTTON_NEGATIVE:
