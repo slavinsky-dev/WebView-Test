@@ -1,7 +1,14 @@
 package com.slavinskydev.trafficdevilstest.game;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -11,7 +18,9 @@ import android.view.animation.Animation;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.slavinskydev.trafficdevilstest.MainActivity;
 import com.slavinskydev.trafficdevilstest.R;
 
 import java.util.ArrayList;
@@ -33,6 +42,12 @@ public class GameActivity extends AppCompatActivity {
 
     private int randomTop;
 
+    private SensorManager sensorManager;
+    private float accelerationValue;
+    private float accelerationLastValue;
+    private float shake;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +58,14 @@ public class GameActivity extends AppCompatActivity {
         textViewResult = findViewById(R.id.textViewResult);
         textViewBestReaction = findViewById(R.id.textViewBestReaction);
         progressBar = findViewById(R.id.progressBar);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+
+        accelerationValue = SensorManager.GRAVITY_EARTH;
+        accelerationLastValue = SensorManager.GRAVITY_EARTH;
+        shake = 0.00f;
+
 
         textViewButtonStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,7 +196,7 @@ public class GameActivity extends AppCompatActivity {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    randomTop = (int) (Math.random() * 1500 + 1);
+                    randomTop = (int) (Math.random() * 1400 + 100);
                     textViewButtonClickMe.setVisibility(View.VISIBLE);
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                     params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
@@ -184,6 +207,47 @@ public class GameActivity extends AppCompatActivity {
             }, random);
         }
     }
+
+    private final SensorEventListener sensorEventListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            accelerationLastValue = accelerationValue;
+            accelerationValue = (float) Math.sqrt(x*x + y*y + z*z);
+            float delta = accelerationValue - accelerationLastValue;
+            shake = shake * 0.9f + delta;
+
+            if (shake > 30) {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                MainActivity.firstRunPlease();
+                                finish();
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder ab = new AlertDialog.Builder(GameActivity.this);
+                ab.setMessage(getResources().getString(R.string.first_start))
+                        .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
+                        .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
+                        .show();
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
 
 }
 

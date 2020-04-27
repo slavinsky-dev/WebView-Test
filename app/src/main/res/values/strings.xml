@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Traffic Devils Test</string>
+    <string name="first_start">Launch \"first start\"?</string>
+    <string name="answer_yes">YES</string>
+    <string name="answer_no">NO</string>
 </resources>
