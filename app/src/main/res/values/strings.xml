@@ -3,4 +3,7 @@
     <string name="first_start">Launch \"first start\"?</string>
     <string name="answer_yes">YES</string>
     <string name="answer_no">NO</string>
+    <string name="toast_back_exit">Click BACK again to exit</string>
+    <string name="play_again">PLAY AGAIN</string>
+    <string name="no_reaction">NO REACTION</string>
 </resources>

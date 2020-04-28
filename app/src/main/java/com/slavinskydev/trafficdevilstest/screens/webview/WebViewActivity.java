@@ -13,17 +13,21 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
-import com.slavinskydev.trafficdevilstest.screens.game.GameActivity;
 import com.slavinskydev.trafficdevilstest.screens.loader.LoaderActivity;
 import com.slavinskydev.trafficdevilstest.R;
+import com.slavinskydev.trafficdevilstest.screens.loader.SharedPreferencesManager;
 
 public class WebViewActivity extends AppCompatActivity {
+
+    boolean doubleBackToExitPressedOnce = false;
 
     private static final String TAG = "";
     private WebView webView;
@@ -40,12 +44,12 @@ public class WebViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_view);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-
+        if (sensorManager != null) {
+            sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        }
         accelerationValue = SensorManager.GRAVITY_EARTH;
         accelerationLastValue = SensorManager.GRAVITY_EARTH;
         shake = 0.00f;
-
 
         webView = findViewById(R.id.WebView);
 
@@ -63,7 +67,6 @@ public class WebViewActivity extends AppCompatActivity {
         webSettings.setDatabaseEnabled(true);
         webSettings.setAppCachePath(getApplicationContext().getFilesDir().getPath() + getPackageName() + "/cache/");
         webSettings.setAppCacheEnabled(true);
-
         CookieManager.getInstance();
 
         if (savedInstanceState == null) {
@@ -77,8 +80,21 @@ public class WebViewActivity extends AppCompatActivity {
         if (webView.canGoBack()) {
             webView.goBack();
         } else {
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                return;
+            }
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, getResources().getString(R.string.toast_back_exit), Toast.LENGTH_SHORT).show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 2000);
         }
+
+
     }
 
     @Override
@@ -106,13 +122,13 @@ public class WebViewActivity extends AppCompatActivity {
             float delta = accelerationValue - accelerationLastValue;
             shake = shake * 0.9f + delta;
 
-            if (shake > 30) {
+            if (shake > 25) {
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                LoaderActivity.firstRunPlease();
+                                SharedPreferencesManager.activateFirstRun();
                                 Intent intent = new Intent(WebViewActivity.this, LoaderActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -135,4 +151,5 @@ public class WebViewActivity extends AppCompatActivity {
 
         }
     };
+
 }

@@ -10,6 +10,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -19,15 +20,19 @@ import android.view.animation.Animation;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.slavinskydev.trafficdevilstest.screens.loader.LoaderActivity;
 import com.slavinskydev.trafficdevilstest.R;
+import com.slavinskydev.trafficdevilstest.screens.loader.SharedPreferencesManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements GameView {
+
+    boolean doubleBackToExitPressedOnce = false;
 
     private TextView textViewButtonStart;
     private TextView textViewButtonClickMe;
@@ -47,6 +52,8 @@ public class GameActivity extends AppCompatActivity {
     private float accelerationLastValue;
     private float shake;
 
+    private GamePresenter presenter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,133 +67,29 @@ public class GameActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        if (sensorManager != null) {
+            sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        }
 
         accelerationValue = SensorManager.GRAVITY_EARTH;
         accelerationLastValue = SensorManager.GRAVITY_EARTH;
         shake = 0.00f;
 
+        presenter = new GamePresenter(this);
 
         textViewButtonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textViewResult.setVisibility(View.GONE);
-                textViewBestReaction.setVisibility(View.GONE);
-                textViewBestReaction.setText("");
-                textViewButtonStart.setVisibility(View.GONE);
-                countDownTimer = 20000;
-                reaction.clear();
-                progressBar.setProgress(countDownTimer);
-
-                new CountDownTimer(20000, 20) {
-                    public void onTick(long millisUntilFinished) {
-                        countDownTimer = countDownTimer - 20;
-                        progressBar.setProgress(countDownTimer - 200);
-                    }
-
-                    public void onFinish() {
-                        textViewButtonClickMe.setVisibility(View.GONE);
-                        textViewButtonStart.setVisibility(View.VISIBLE);
-                        textViewBestReaction.setVisibility(View.INVISIBLE);
-                        textViewButtonStart.setText("PLAY AGAIN");
-                        countDownTimer = 0;
-                        progressBar.setProgress(0);
-                        if (reaction.size() != 0) {
-                            int minIndex = reaction.indexOf(Collections.min(reaction));
-                            bestReaction = reaction.get(minIndex);
-                            final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.0f, 1.0f);
-                            alphaAnimationTitle.setStartOffset(0);
-                            alphaAnimationTitle.setDuration(900);
-                            alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
-                                @Override
-                                public void onAnimationStart(Animation animation) {
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animation animation) {
-                                    textViewBestReaction.setVisibility(View.VISIBLE);
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animation animation) {
-                                }
-                            });
-                            textViewBestReaction.setAnimation(alphaAnimationTitle);
-                            textViewBestReaction.setText("BEST REACTION\n" + bestReaction + " ms");
-                            textViewBestReaction.setTextColor(getColor(R.color.colorPrimary));
-                        } else {
-                            final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.0f, 1.0f);
-                            alphaAnimationTitle.setStartOffset(0);
-                            alphaAnimationTitle.setDuration(900);
-                            alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
-                                @Override
-                                public void onAnimationStart(Animation animation) {
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animation animation) {
-                                    textViewBestReaction.setVisibility(View.VISIBLE);
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animation animation) {
-                                }
-                            });
-                            textViewBestReaction.setAnimation(alphaAnimationTitle);
-                            textViewBestReaction.setText("NO REACTION");
-                            textViewBestReaction.setTextColor(getColor(R.color.gray));
-                        }
-                    }
-                }.start();
-
-                startClickMe();
-
+                presenter.startGame();
             }
         });
 
         textViewButtonClickMe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                endTime = System.currentTimeMillis();
-                currentReaction = endTime - startTime;
-                reaction.add(currentReaction);
-
-                textViewButtonClickMe.setVisibility(View.GONE);
-
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
-                params.setMargins(0, randomTop, 0, 0);
-                textViewResult.setLayoutParams(params);
-                textViewResult.setText(currentReaction + " ms");
-                textViewResult.setVisibility(View.VISIBLE);
-
-
-                final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.8f, 0.0f);
-                alphaAnimationTitle.setStartOffset(1);
-                alphaAnimationTitle.setDuration(350);
-                alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        textViewResult.setVisibility(View.INVISIBLE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                    }
-                });
-                textViewResult.setAnimation(alphaAnimationTitle);
-
-
-                startClickMe();
-
-
+                presenter.clickMeButton();
             }
         });
-
     }
 
     public void startClickMe() {
@@ -211,23 +114,20 @@ public class GameActivity extends AppCompatActivity {
     private final SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-
             accelerationLastValue = accelerationValue;
             accelerationValue = (float) Math.sqrt(x*x + y*y + z*z);
             float delta = accelerationValue - accelerationLastValue;
             shake = shake * 0.9f + delta;
-
-            if (shake > 30) {
+            if (shake > 25) {
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                LoaderActivity.firstRunPlease();
+                                SharedPreferencesManager.activateFirstRun();
                                 Intent intent = new Intent(GameActivity.this, LoaderActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -244,12 +144,147 @@ public class GameActivity extends AppCompatActivity {
                         .show();
             }
         }
-
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
         }
     };
 
+    @Override
+    public void startGame() {
+        textViewResult.setVisibility(View.GONE);
+        textViewBestReaction.setVisibility(View.GONE);
+        textViewBestReaction.setText("");
+        textViewButtonStart.setVisibility(View.GONE);
+        reaction.clear();
+        progressBar.setProgress(countDownTimer);
+        countDownTimer = 20000;
+
+        new CountDownTimer(20000, 20) {
+            public void onTick(long millisUntilFinished) {
+                countDownTimer = countDownTimer - 20;
+                progressBar.setProgress(countDownTimer - 200);
+            }
+
+            public void onFinish() {
+                textViewButtonClickMe.setVisibility(View.GONE);
+                textViewButtonStart.setVisibility(View.VISIBLE);
+                textViewBestReaction.setVisibility(View.INVISIBLE);
+                textViewButtonStart.setText(R.string.play_again);
+                countDownTimer = 0;
+                progressBar.setProgress(0);
+                if (reaction.size() != 0) {
+                    int minIndex = reaction.indexOf(Collections.min(reaction));
+                    bestReaction = reaction.get(minIndex);
+                    final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.0f, 1.0f);
+                    alphaAnimationTitle.setStartOffset(0);
+                    alphaAnimationTitle.setDuration(900);
+                    alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            textViewBestReaction.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+                    });
+                    textViewBestReaction.setAnimation(alphaAnimationTitle);
+                    textViewBestReaction.setText("BEST REACTION\n" + bestReaction + " ms");
+                    textViewBestReaction.setTextColor(getColor(R.color.colorPrimary));
+                } else {
+                    final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.0f, 1.0f);
+                    alphaAnimationTitle.setStartOffset(0);
+                    alphaAnimationTitle.setDuration(900);
+                    alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            textViewBestReaction.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+                    });
+                    textViewBestReaction.setAnimation(alphaAnimationTitle);
+                    textViewBestReaction.setText(R.string.no_reaction);
+                    textViewBestReaction.setTextColor(getColor(R.color.gray));
+                }
+            }
+        }.start();
+        startClickMe();
+    }
+
+    @Override
+    public void clickMeButton() {
+        endTime = System.currentTimeMillis();
+        currentReaction = endTime - startTime;
+        reaction.add(currentReaction);
+        textViewButtonClickMe.setVisibility(View.GONE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        params.setMargins(0, randomTop, 0, 0);
+        textViewResult.setLayoutParams(params);
+        textViewResult.setText(currentReaction + " ms");
+        textViewResult.setVisibility(View.VISIBLE);
+
+        final AlphaAnimation alphaAnimationTitle = new AlphaAnimation(0.8f, 0.0f);
+        alphaAnimationTitle.setStartOffset(1);
+        alphaAnimationTitle.setDuration(350);
+        alphaAnimationTitle.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                textViewResult.setVisibility(View.INVISIBLE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        textViewResult.setAnimation(alphaAnimationTitle);
+        final MediaPlayer fartLong = MediaPlayer.create(this, R.raw.fartlong);
+        final MediaPlayer fart = MediaPlayer.create(this, R.raw.fart);
+        final MediaPlayer tap = MediaPlayer.create(this, R.raw.tap);
+        final MediaPlayer ding = MediaPlayer.create(this, R.raw.ding);
+        final MediaPlayer wow = MediaPlayer.create(this, R.raw.wow);
+        if (currentReaction > 1000) {
+            fartLong.start();
+        } else if (currentReaction > 500 && currentReaction < 1000) {
+            fart.start();
+        } else if (currentReaction > 350 && currentReaction <= 500) {
+            tap.start();
+        } else if (currentReaction > 250 && currentReaction <= 350) {
+            ding.start();
+        } else if (currentReaction <= 250) {
+            wow.start();
+        }
+
+        startClickMe();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, getResources().getString(R.string.toast_back_exit), Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
 }
 
