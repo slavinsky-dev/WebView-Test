@@ -7,6 +7,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -57,10 +58,16 @@ public class LoaderPresenter {
                                 }
                             } else {
                                 //view.showServerError(task);
-                                Toast.makeText(context, "No response from server ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    });
+                    })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
+                }
+            });
             SharedPreferencesManager.setFirstRunPreferences();
         } else {
             if (SharedPreferencesManager.loadNextRunPreferences()) {

@@ -6,4 +6,7 @@
     <string name="toast_back_exit">Click BACK again to exit</string>
     <string name="play_again">PLAY AGAIN</string>
     <string name="no_reaction">NO REACTION</string>
+    <string name="launch_first_start">LAUNCH FIRST START</string>
+    <string name="click_me">CLICK ME!</string>
+    <string name="play">PLAY</string>
 </resources>

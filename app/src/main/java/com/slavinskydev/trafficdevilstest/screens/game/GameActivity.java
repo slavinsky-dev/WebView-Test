@@ -39,6 +39,7 @@ public class GameActivity extends AppCompatActivity implements GameView {
     private TextView textViewButtonClickMe;
     private TextView textViewResult;
     private TextView textViewBestReaction;
+    private TextView textViewLaunchFirstStart;
 
     private long startTime, endTime, currentReaction, bestReaction;
     private int countDownTimer = 20000;
@@ -55,6 +56,7 @@ public class GameActivity extends AppCompatActivity implements GameView {
 
     private GamePresenter presenter;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +66,12 @@ public class GameActivity extends AppCompatActivity implements GameView {
         textViewButtonClickMe = findViewById(R.id.textViewButtonClickMe);
         textViewResult = findViewById(R.id.textViewResult);
         textViewBestReaction = findViewById(R.id.textViewBestReaction);
+        textViewLaunchFirstStart = findViewById(R.id.textViewLaunchFirstStart);
+
         progressBar = findViewById(R.id.progressBar);
+
+
+
 
 
         presenter = new GamePresenter(this);
@@ -126,27 +133,14 @@ public class GameActivity extends AppCompatActivity implements GameView {
             float delta = accelerationValue - accelerationLastValue;
             shake = shake * 0.9f + delta;
             if (shake > 25) {
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                textViewLaunchFirstStart.setVisibility(View.VISIBLE);
+                textViewLaunchFirstStart.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                SharedPreferencesManager.activateFirstRun();
-                                Intent intent = new Intent(GameActivity.this, LoaderActivity.class);
-                                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-
-                                break;
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                break;
-                        }
+                    public void onClick(View v) {
+                        showAlertDialog();
+                        textViewLaunchFirstStart.setVisibility(View.GONE);
                     }
-                };
-                AlertDialog.Builder ab = new AlertDialog.Builder(GameActivity.this);
-                ab.setMessage(getResources().getString(R.string.first_start))
-                        .setCancelable(true)
-                        .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
-                        .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
-                        .show();
+                });
             }
         }
 
@@ -154,6 +148,31 @@ public class GameActivity extends AppCompatActivity implements GameView {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
+
+    public void showAlertDialog() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        SharedPreferencesManager.activateFirstRun();
+                        Intent intent = new Intent(GameActivity.this, LoaderActivity.class);
+                        startActivity(intent);
+                        finish();
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder ab;
+        ab = new AlertDialog.Builder(GameActivity.this);
+        ab.setMessage(getResources().getString(R.string.first_start))
+                .setCancelable(true)
+                .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
+                .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
+                .show();
+    }
 
     @Override
     public void startGame() {

@@ -26,7 +26,7 @@
         android:paddingEnd="15dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:text="CLICK ME!"
+        android:text="@string/click_me"
         android:textSize="35sp"
         android:textAlignment="center"
         android:textColor="@android:color/white"
@@ -45,7 +45,7 @@
         android:paddingEnd="15dp"
         android:paddingTop="15dp"
         android:paddingBottom="5dp"
-        android:text="PLAY"
+        android:text="@string/play"
         android:textSize="30sp"
         android:textAlignment="center"
         android:textColor="@android:color/white"
@@ -74,5 +74,18 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         />
+
+    <TextView
+        android:id="@+id/textViewLaunchFirstStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:text="@string/launch_first_start"
+        android:textSize="30sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_start"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>

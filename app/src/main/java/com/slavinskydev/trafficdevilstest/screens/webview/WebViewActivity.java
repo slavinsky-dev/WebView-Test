@@ -14,13 +14,16 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.slavinskydev.trafficdevilstest.screens.game.GameActivity;
 import com.slavinskydev.trafficdevilstest.screens.loader.LoaderActivity;
 import com.slavinskydev.trafficdevilstest.R;
 import com.slavinskydev.trafficdevilstest.screens.loader.SharedPreferencesManager;
@@ -37,11 +40,15 @@ public class WebViewActivity extends AppCompatActivity {
     private float accelerationLastValue;
     private float shake;
 
+    private TextView textViewLaunchFirstStart;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
+
+        textViewLaunchFirstStart = findViewById(R.id.textViewLaunchFirstStart);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager != null) {
@@ -123,26 +130,14 @@ public class WebViewActivity extends AppCompatActivity {
             shake = shake * 0.9f + delta;
 
             if (shake > 25) {
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                textViewLaunchFirstStart.setVisibility(View.VISIBLE);
+                textViewLaunchFirstStart.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                SharedPreferencesManager.activateFirstRun();
-                                Intent intent = new Intent(WebViewActivity.this, LoaderActivity.class);
-                                startActivity(intent);
-                                finish();
-                                break;
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                break;
-                        }
+                    public void onClick(View v) {
+                        showAlertDialog();
+                        textViewLaunchFirstStart.setVisibility(View.GONE);
                     }
-                };
-                AlertDialog.Builder ab = new AlertDialog.Builder(WebViewActivity.this);
-                ab.setMessage(getResources().getString(R.string.first_start))
-                        .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
-                        .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
-                        .show();
+                });
             }
         }
 
@@ -151,5 +146,30 @@ public class WebViewActivity extends AppCompatActivity {
 
         }
     };
+
+    public void showAlertDialog() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        SharedPreferencesManager.activateFirstRun();
+                        Intent intent = new Intent(WebViewActivity.this, LoaderActivity.class);
+                        startActivity(intent);
+                        finish();
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder ab;
+        ab = new AlertDialog.Builder(WebViewActivity.this);
+        ab.setMessage(getResources().getString(R.string.first_start))
+                .setCancelable(true)
+                .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
+                .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
+                .show();
+    }
 
 }
