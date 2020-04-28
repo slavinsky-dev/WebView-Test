@@ -57,7 +57,7 @@ public class LoaderPresenter {
                                 }
                             } else {
                                 //view.showServerError(task);
-                                Toast.makeText(context, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "No response from server ", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });

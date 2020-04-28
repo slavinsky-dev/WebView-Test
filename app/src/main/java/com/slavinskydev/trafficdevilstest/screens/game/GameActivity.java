@@ -3,6 +3,7 @@ package com.slavinskydev.trafficdevilstest.screens.game;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -54,7 +55,6 @@ public class GameActivity extends AppCompatActivity implements GameView {
 
     private GamePresenter presenter;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,14 +66,6 @@ public class GameActivity extends AppCompatActivity implements GameView {
         textViewBestReaction = findViewById(R.id.textViewBestReaction);
         progressBar = findViewById(R.id.progressBar);
 
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager != null) {
-            sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        }
-
-        accelerationValue = SensorManager.GRAVITY_EARTH;
-        accelerationLastValue = SensorManager.GRAVITY_EARTH;
-        shake = 0.00f;
 
         presenter = new GamePresenter(this);
 
@@ -111,6 +103,18 @@ public class GameActivity extends AppCompatActivity implements GameView {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager != null) {
+            sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        accelerationValue = SensorManager.GRAVITY_EARTH;
+        accelerationLastValue = SensorManager.GRAVITY_EARTH;
+        shake = 0.00f;
+    }
+
     private final SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -118,7 +122,7 @@ public class GameActivity extends AppCompatActivity implements GameView {
             float y = event.values[1];
             float z = event.values[2];
             accelerationLastValue = accelerationValue;
-            accelerationValue = (float) Math.sqrt(x*x + y*y + z*z);
+            accelerationValue = (float) Math.sqrt(x * x + y * y + z * z);
             float delta = accelerationValue - accelerationLastValue;
             shake = shake * 0.9f + delta;
             if (shake > 25) {
@@ -129,8 +133,8 @@ public class GameActivity extends AppCompatActivity implements GameView {
                             case DialogInterface.BUTTON_POSITIVE:
                                 SharedPreferencesManager.activateFirstRun();
                                 Intent intent = new Intent(GameActivity.this, LoaderActivity.class);
-                                startActivity(intent);
-                                finish();
+                                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+
                                 break;
                             case DialogInterface.BUTTON_NEGATIVE:
                                 break;
@@ -139,11 +143,13 @@ public class GameActivity extends AppCompatActivity implements GameView {
                 };
                 AlertDialog.Builder ab = new AlertDialog.Builder(GameActivity.this);
                 ab.setMessage(getResources().getString(R.string.first_start))
+                        .setCancelable(true)
                         .setPositiveButton(getResources().getString(R.string.answer_yes), dialogClickListener)
                         .setNegativeButton(getResources().getString(R.string.answer_no), dialogClickListener)
                         .show();
             }
         }
+
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
@@ -242,10 +248,12 @@ public class GameActivity extends AppCompatActivity implements GameView {
             @Override
             public void onAnimationStart(Animation animation) {
             }
+
             @Override
             public void onAnimationEnd(Animation animation) {
                 textViewResult.setVisibility(View.INVISIBLE);
             }
+
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
@@ -282,7 +290,7 @@ public class GameActivity extends AppCompatActivity implements GameView {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                doubleBackToExitPressedOnce=false;
+                doubleBackToExitPressedOnce = false;
             }
         }, 2000);
     }
